@@ -7,11 +7,12 @@ const AdminPage = () => {
 
     useEffect(() => {
         const fetchPreOrders = async () => {
-            const response = await axios.get('/api/preorders');
+            const response = await axios.get('http://localhost:5000/api/preorders');
             setPreOrders(response.data);
         };
         fetchPreOrders();
     }, []);
+
 
     return (
         <div className="admin-page">
