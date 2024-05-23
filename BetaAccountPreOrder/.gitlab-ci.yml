@@ -1,0 +1,42 @@
+stages:
+  - build
+  - deploy
+
+# Frontend build job
+build_frontend:
+  stage: build
+  image: node:14
+  before_script:
+    - cd frontend
+  script:
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/build
+
+# Backend build job
+build_backend:
+  stage: build
+  image: node:14
+  before_script:
+    - cd backend
+  script:
+    - npm install
+  artifacts:
+    paths:
+      - backend
+
+# Deployment job (example using Heroku or another platform)
+deploy:
+  stage: deploy
+  image: ruby:2.7
+  before_script:
+    - curl https://cli-assets.heroku.com/install.sh | sh
+  script:
+    - heroku login
+    - git push heroku master
+  environment:
+    name: production
+  only:
+    - master
