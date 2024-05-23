@@ -1,32 +1,54 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+const authRoutes = require('./routes/users');
+const betaPreOrderRoutes = require('./routes/betaPreOrders');
+const blogPostRoutes = require('./routes/blogPosts');
+const notificationRoutes = require('./routes/notifications');
+const transactionRoutes = require('./routes/transactions');
+const recurringTransactionRoutes = require('./routes/recurringTransactions');
+const auditRoutes = require('./routes/audit');
+const currencyRoutes = require('./routes/currencies');
+const emailTemplateRoutes = require('./routes/emailTemplates');
+const referralRoutes = require('./routes/referrals');
+const gamificationRoutes = require('./routes/gamification');
+const forumRoutes = require('./routes/forum');
+const exclusiveContentRoutes = require('./routes/exclusiveContent');
+const feedbackProgramRoutes = require('./routes/feedbackProgram');
+const roadmapRoutes = require('./routes/roadmap');
+const meetingRoutes = require('./routes/meetings');
+const securityMiddleware = require('./middlewares/security');
+const logger = require('./middlewares/logger');
+require('dotenv').config();
+
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(bodyParser.json());
+securityMiddleware(app);
+app.use(logger);
 
-mongoose.connect('your-mongo-db-connection-string', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to database'))
+    .catch((error) => console.error('Database connection error:', error));
 
-const preOrderSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    address: String,
-    plan: String,
-    price: Number,
-});
+app.use(express.json());
+app.use('/auth', authRoutes);
+app.use('/beta-preorders', betaPreOrderRoutes);
+app.use('/blogposts', blogPostRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/transactions', transactionRoutes);
+app.use('/recurring-transactions', recurringTransactionRoutes);
+app.use('/audit', auditRoutes);
+app.use('/currencies', currencyRoutes);
+app.use('/email-templates', emailTemplateRoutes);
+app.use('/referrals', referralRoutes);
+app.use('/gamification', gamificationRoutes);
+app.use('/forum', forumRoutes);
+app.use('/exclusive-content', exclusiveContentRoutes);
+app.use('/feedback-program', feedbackProgramRoutes);
+app.use('/roadmap', roadmapRoutes);
+app.use('/meetings', meetingRoutes);
 
-const PreOrder = mongoose.model('PreOrder', preOrderSchema);
-
-app.post('/api/preorder', async (req, res) => {
-    const { name, email, address, plan, price } = req.body;
-    const newPreOrder = new PreOrder({ name, email, address, plan, price });
-    await newPreOrder.save();
-    res.send({ message: 'Pre-order saved successfully!' });
-});
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+

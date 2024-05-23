@@ -17,9 +17,12 @@ form {
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
 }
 
-input {
+input,
+textarea {
     display: block;
     width: 100%;
     padding: 10px;
@@ -36,8 +39,19 @@ button {
     border-radius: 5px;
     color: white;
     font-size: 16px;
+    cursor: pointer;
 }
 
 button:hover {
     background: #218838;
+}
+
+@media (max-width: 600px) {
+    form {
+        padding: 10px;
+    }
+
+    button {
+        font-size: 14px;
+    }
 }

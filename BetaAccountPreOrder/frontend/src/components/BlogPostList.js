@@ -13,6 +13,13 @@ const BlogPostList = () => {
         fetchBlogPosts();
     }, []);
 
+    const handleDelete = async (id) => {
+        const response = await fetch(`/api/blogPosts/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            setBlogPosts(blogPosts.filter(post => post._id !== id));
+        }
+    };
+
     return (
         <div>
             <h2>Blog Posts</h2>
@@ -21,6 +28,7 @@ const BlogPostList = () => {
                     <li key={post._id}>
                         <h3>{post.title}</h3>
                         <p>{post.content}</p>
+                        <button onClick={() => handleDelete(post._id)}>Delete</button>
                     </li>
                 ))}
             </ul>

@@ -1,33 +1,32 @@
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const User = require('../models/User');
-const { sendVerificationEmail } = require('../utils/email');
+const jwt = require('jsonwebtoken');
+const { sendPasswordResetEmail } = require('../utils/email');
 
-exports.register = async (req, res) => {
-    const { username, email, password } = req.body;
+exports.requestPasswordReset = async (req, res) => {
+    const { email } = req.body;
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const emailToken = crypto.randomBytes(16).toString('hex');
-        const newUser = new User({ username, email, password: hashedPassword, emailToken });
-        await newUser.save();
-        sendVerificationEmail(newUser.email, emailToken);
-        res.status(201).send('User registered');
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        sendPasswordResetEmail(user.email, token);
+        res.send('Password reset link sent to email');
     } catch (error) {
-        res.status(400).send('Error registering user');
+        res.status(500).send('Server error');
     }
 };
 
-exports.verifyEmail = async (req, res) => {
-    const { token } = req.query;
+exports.resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
     try {
-        const user = await User.findOne({ emailToken: token });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id);
         if (!user) {
-            return res.status(400).send('Invalid token');
+            return res.status(404).send('User not found');
         }
-        user.isVerified = true;
-        user.emailToken = null;
+        user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
-        res.send('Email verified');
+        res.send('Password has been reset');
     } catch (error) {
         res.status(500).send('Server error');
     }
